@@ -1,0 +1,35 @@
+{
+  "name": "opencode-tabbit-auth",
+  "version": "0.1.0",
+  "description": "OpenCode & Magpie provider plugin: Tabbit (AI 智能浏览器) models via Session Cookie & local profile",
+  "type": "module",
+  "main": "./index.mjs",
+  "exports": "./index.mjs",
+  "files": [
+    "index.mjs",
+    "README.md",
+    "DESIGN.md"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "magpie",
+    "tabbit",
+    "tabbit-browser",
+    "deepseek",
+    "kimi",
+    "glm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuweihao17/opencode-tabbit-auth.git"
+  },
+  "magpie": {
+    "maxConcurrency": 4,
+    "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkY2QjAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEyIDNhOSAzIDAgMCAwLTkgOXY1YTMgMyAwIDAgMCAzIDNoMTJhMyAzIDAgMCAwIDMtM3YtNWE5IDMgMCAwIDAtOS05eiIvPjxwYXRoIGQ9Ik05IDEwdjJtNi0ydiIvPjwvc3ZnPg=="
+  }
+}

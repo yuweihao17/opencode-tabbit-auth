@@ -1,0 +1,9 @@
+{
+  "name": "opencode-tabbit-auth",
+  "version": "0.1.0",
+  "description": "Tabbit AI 浏览器模型接入 (DeepSeek V4, GLM-5.3, Kimi K3, Qwen 等)",
+  "author": "yuweihao17",
+  "license": "MIT",
+  "providers": ["tabbit"],
+  "replaces": "tabbit"
+}

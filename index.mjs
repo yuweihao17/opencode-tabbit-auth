@@ -203,7 +203,12 @@ function createOpenAIStreamTransform(modelId, id = `chatcmpl-${randomUUID()}`) {
           if (!data) continue
 
           // 1. Thinking / reasoning chunk
-          if (currentEvent === "onThinking" && typeof data.reasoning_content === "string") {
+          const isThinking = currentEvent === "onThinking"
+            || (currentEvent === "assistant_message_delta" && (data.payload?.chunk_type === "thinking_chunk" || data.payload?.delta_type === "thinking"))
+          const reasoningContent = isThinking
+            ? (data.reasoning_content || data.payload?.delta || data.payload?.chunk_payload?.reasoning_content || data.payload?.chunk_payload?.content || "")
+            : ""
+          if (reasoningContent) {
             const chunkPayload = {
               id,
               object: "chat.completion.chunk",
@@ -212,7 +217,7 @@ function createOpenAIStreamTransform(modelId, id = `chatcmpl-${randomUUID()}`) {
               choices: [
                 {
                   index: 0,
-                  delta: { reasoning_content: data.reasoning_content },
+                  delta: { reasoning_content: reasoningContent },
                   finish_reason: null,
                 },
               ],
@@ -221,7 +226,12 @@ function createOpenAIStreamTransform(modelId, id = `chatcmpl-${randomUUID()}`) {
           }
 
           // 2. Normal text output chunk
-          if (currentEvent === "onMessageChunk" && typeof data.content === "string") {
+          const isContent = currentEvent === "onMessageChunk"
+            || (currentEvent === "assistant_message_delta" && data.payload?.chunk_type !== "thinking_chunk" && data.payload?.delta_type !== "thinking")
+          const content = isContent
+            ? (data.content || data.payload?.delta || data.payload?.chunk_payload?.content || "")
+            : ""
+          if (content) {
             const chunkPayload = {
               id,
               object: "chat.completion.chunk",
@@ -230,7 +240,7 @@ function createOpenAIStreamTransform(modelId, id = `chatcmpl-${randomUUID()}`) {
               choices: [
                 {
                   index: 0,
-                  delta: { content: data.content },
+                  delta: { content },
                   finish_reason: null,
                 },
               ],
@@ -239,7 +249,12 @@ function createOpenAIStreamTransform(modelId, id = `chatcmpl-${randomUUID()}`) {
           }
 
           // 3. Finished message / run
-          if (currentEvent === "onRunFinish" || currentEvent === "onMessageFinish") {
+          if (
+            currentEvent === "onRunFinish"
+            || currentEvent === "onMessageFinish"
+            || currentEvent === "assistant_message_finished"
+            || currentEvent === "run_completed"
+          ) {
             const finishPayload = {
               id,
               object: "chat.completion.chunk",
@@ -290,11 +305,20 @@ async function aggregateStreamToCompletion(stream, modelId, id = `chatcmpl-${ran
         if (!rawData) continue
         const data = safeJson(rawData)
         if (!data) continue
-        if (currentEvent === "onThinking" && typeof data.reasoning_content === "string") {
-          fullReasoning += data.reasoning_content
-        } else if (currentEvent === "onMessageChunk" && typeof data.content === "string") {
-          fullContent += data.content
-        }
+
+        const isThinking = currentEvent === "onThinking"
+          || (currentEvent === "assistant_message_delta" && (data.payload?.chunk_type === "thinking_chunk" || data.payload?.delta_type === "thinking"))
+        const reasoningContent = isThinking
+          ? (data.reasoning_content || data.payload?.delta || data.payload?.chunk_payload?.reasoning_content || data.payload?.chunk_payload?.content || "")
+          : ""
+        if (reasoningContent) fullReasoning += reasoningContent
+
+        const isContent = currentEvent === "onMessageChunk"
+          || (currentEvent === "assistant_message_delta" && data.payload?.chunk_type !== "thinking_chunk" && data.payload?.delta_type !== "thinking")
+        const content = isContent
+          ? (data.content || data.payload?.delta || data.payload?.chunk_payload?.content || "")
+          : ""
+        if (content) fullContent += content
       }
     }
   }
